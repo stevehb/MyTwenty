@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MyTwenty</string>
+    <string name="location_label">Location</string>
+    <string name="lat_label">lat:</string>
+    <string name="lon_label">lon:</string>
+    <string name="lon_value"></string>
+    <string name="lat_value"></string>
+    <string name="address_label">Address</string>
+    <string name="btn_refresh_label">Refresh</string>
+    <string name="geo_no_address">The Geocoder found no addresses!</string>
+    <string name="geo_io_exception">ERROR: I/O Exception encountered while reading location!</string>
+    <string name="progress_dialog_title">Working...</string>
+    <string name="progress_dialog_message">Getting GPS coords...</string>
+    <string name="btn_continuous_label">Continuous</string>
+</resources>
