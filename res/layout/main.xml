@@ -1,95 +1,154 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  android:layout_width="fill_parent"
-  android:layout_height="fill_parent"
-  android:weightSum="1"
-  android:orientation="vertical">
-  <TextView
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:layout_height="wrap_content"
-    android:id="@+id/txtValueLabel"
-    android:layout_width="wrap_content"
-    android:text="@string/location_label"></TextView>
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:id="@+id/linearLayout1"
-    android:layout_height="wrap_content">
-    <TextView
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_height="wrap_content"
-      android:layout_marginLeft="15dp"
-      android:id="@+id/txtLatLabel"
-      android:layout_width="wrap_content"
-      android:text="@string/lat_label"
-      android:width="40dp"></TextView>
-    <TextView
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_height="wrap_content"
-      android:id="@+id/txtLatValue"
-      android:layout_width="wrap_content"
-      android:text="@string/lat_value"></TextView>
-  </LinearLayout>
-  <LinearLayout
-    android:layout_width="match_parent"
-    android:id="@+id/linearLayout2"
-    android:layout_height="wrap_content">
-    <TextView
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_height="wrap_content"
-      android:id="@+id/txtLonLabel"
-      android:layout_marginLeft="15dp"
-      android:layout_width="wrap_content"
-      android:text="@string/lon_label"
-      android:width="40dp">></TextView>
-    <TextView
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:layout_height="wrap_content"
-      android:id="@+id/txtLonValue"
-      android:layout_width="wrap_content"
-      android:text="@string/lon_value"></TextView>
-  </LinearLayout>
-  <TextView
-    android:textAppearance="?android:attr/textAppearanceMedium"
-    android:layout_height="wrap_content"
-    android:id="@+id/textView1"
-    android:layout_width="wrap_content"
-    android:layout_marginTop="15dp"
-    android:text="@string/address_label"></TextView>
-  <EditText
-    android:id="@+id/txtAddress"
-    android:inputType="textMultiLine"
-    android:layout_gravity="fill_vertical"
-    android:layout_height="wrap_content"
-    android:layout_width="match_parent"
-    android:layout_weight="1"
-    android:editable="false">
-    <requestFocus></requestFocus>
-  </EditText>
-  <TableLayout
-    android:layout_height="wrap_content"
-    android:id="@+id/tableLayout1"
-    android:layout_width="match_parent">
-    <TableRow
-      android:id="@+id/tableRow1"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content">
-      <TextView
-        android:id="@+id/textView2"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/radialbg"
+    android:orientation="vertical"
+    android:weightSum="1" >
+
+    <!-- Top bar with icon and lat/lon values -->
+
+    <LinearLayout
+        android:id="@+id/linearLayout1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="@string/continuous_label"></TextView>
-      <ToggleButton
-        android:id="@+id/btnContinuous"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"></ToggleButton>
-      <Button
-        android:id="@+id/btnRefresh"
-        android:text="@string/btn_refresh_label"
+        android:background="@drawable/radialbg" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:src="@drawable/icon_big" />
+
+        <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical" >
+
+            <!-- The lat/lon labels -->
+
+            <LinearLayout
+                android:id="@+id/linearLayout3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:text="@string/lat_label"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="3dp"
+                    android:text="@string/lon_label"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+
+            <!-- The lat/lon values -->
+
+            <LinearLayout
+                android:id="@+id/linearLayout4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/txtLatValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/na"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/txtLonValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/na"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="fill_parent" 
-        android:layout_weight="1"  android:layout_marginLeft="70dp"></Button>
-    </TableRow>
-  </TableLayout>
+        android:layout_marginTop="16dp" >
+
+        <LinearLayout
+            android:id="@+id/linearLayout6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/address_label"
+                android:textAppearance="?android:attr/textAppearanceLarge" />
+
+            <EditText
+                android:id="@+id/txtAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
+                android:background="#44000000"
+                android:textColor="#FFFFFFFF"
+                android:gravity="center_vertical"
+                android:inputType="none"
+                android:lines="4" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:gravity="center" >
+
+        <com.google.android.maps.MapView
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="128dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginRight="12dp"
+            android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="12dp"
+        android:layout_marginRight="12dp"
+        android:layout_marginTop="16dp"
+        android:gravity="center" >
+
+        <ToggleButton
+            android:id="@+id/btnContinuous"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="ToggleButton"
+            android:textOff="@string/btn_continuous_label"
+            android:textOn="@string/btn_continuous_label" />
+
+        <Button
+            android:id="@+id/btnRefresh"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/btn_refresh_label" />
+    </LinearLayout>
+
 </LinearLayout>

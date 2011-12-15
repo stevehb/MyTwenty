@@ -1,7 +1,6 @@
 package net.cruciblesoftware.MyTwenty;
 
-import android.app.Activity;
-import android.location.LocationManager;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.text.ClipboardManager;
 import android.view.View;
@@ -14,18 +13,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-public class MyTwentyActivity extends Activity {
-    private final String KEY_CONTINUOUS = "continuous";
+import com.google.android.maps.GeoPoint;
+import com.google.android.maps.MapActivity;
+import com.google.android.maps.MapController;
+import com.google.android.maps.MapView;
+
+public class MyTwentyActivity extends MapActivity {
+    private static final String TAG = "20: " + MyTwentyActivity.class.getSimpleName();
+    //private final String KEY_CONTINUOUS = "continuous";
 
     private EditText txtAddress;
     private TextView txtLat, txtLon;
+    private MapView mapView;
 
-    private LocationManager locManager;
     private TwentyListener locListener;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+
         setContentView(R.layout.main);
         txtAddress = (EditText)(findViewById(R.id.txtAddress));
         txtLat = (TextView)(findViewById(R.id.txtLatValue));
@@ -33,18 +39,21 @@ public class MyTwentyActivity extends Activity {
 
         // set up edit box to be display only
         txtAddress.setFocusable(false);
+        mapView = (MapView)(findViewById(R.id.map));
+        mapView.setBuiltInZoomControls(false);
 
         // create a location listener to get GPS updates
-        locManager = (LocationManager)getSystemService(LOCATION_SERVICE);
-        locListener = new TwentyListener(locManager, this);
+        locListener = new TwentyListener(this);
 
         // The address text box
         txtAddress.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
+                if(txtAddress.toString().isEmpty())
+                    return true;
                 ClipboardManager clipboard =
                         (ClipboardManager)(getSystemService(CLIPBOARD_SERVICE));
-                clipboard.setText(txtAddress.getText());
+                clipboard.setText(txtAddress.toString());
                 Toast toast = Toast.makeText(MyTwentyActivity.super,
                         R.string.toast_address_copied, Toast.LENGTH_SHORT);
                 toast.show();
@@ -68,15 +77,31 @@ public class MyTwentyActivity extends Activity {
             }
         });
 
-        if(bundle != null)
-            locListener.setContinuous(bundle.getBoolean(KEY_CONTINUOUS, false));
+        //if(bundle != null)
+        //    locListener.setContinuous(bundle.getBoolean(KEY_CONTINUOUS, false));
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(KEY_CONTINUOUS, locListener.isContinuous);
+
+    void setLatLon(double lat, double lon) {
+        txtLat.setText(Double.toString(lat));
+        txtLon.setText(Double.toString(lon));
     }
+
+    void setAddress(String str) {
+        txtAddress.setText(str);
+    }
+
+    void setMap(double lat, double lon) {
+        MapController mc = mapView.getController();
+        mc.setCenter(new GeoPoint((int)(lat * 1000000), (int)(lon * 1000000)));
+        mc.setZoom(18);
+    }
+
+    //@Override
+    //protected void onSaveInstanceState(Bundle outState) {
+    //    super.onSaveInstanceState(outState);
+    //    outState.putBoolean(KEY_CONTINUOUS, locListener.isContinuous);
+    //}
 
     @Override
     public void onPause() {
@@ -86,24 +111,22 @@ public class MyTwentyActivity extends Activity {
     }
 
     @Override
-    public void onStop() {
+    public void onResume() {
+        locListener.setContinuous(false);
         locListener.deactivateListener();
         locListener.hideNotification();
-        super.onPause();
+        super.onResume();
     }
 
     @Override
-    public void onDestroy() {
-        locListener.deactivateListener();
-        super.onPause();
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        // improve background gradient quality on some phones
+        this.getWindow().setFormat(PixelFormat.RGBA_8888);
     }
 
-    public void setLatLon(double lat, double lon) {
-        txtLat.setText(Double.toString(lat));
-        txtLon.setText(Double.toString(lon));
-    }
-
-    public void setAddress(String str) {
-        txtAddress.setText(str);
+    @Override
+    protected boolean isRouteDisplayed() {
+        return false;
     }
 }
