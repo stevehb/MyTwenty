@@ -7,7 +7,6 @@ import java.util.Locale;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
-import android.util.Log;
 
 class ReverseGeocoder {
     private static final String TAG = "20: " + ReverseGeocoder.class.getSimpleName();
@@ -65,16 +64,16 @@ class ReverseGeocoder {
 
             // prepend the feature if it's not already in address
             String feature = a.getFeatureName();
-            Log.d(TAG, "detected feature name: " + feature);
+            DebugFile.log(TAG, "detected feature name: " + feature);
             if(!buff.toString().toLowerCase().contains(feature.toLowerCase())) {
                 buff = new StringBuilder(feature + "\n" + buff.toString());
             }
 
             return buff.toString();
         } catch (IOException e) {
-            Log.w(TAG, "WARNING: I/O exception while reverse geocoding: " + e.getLocalizedMessage());
+            DebugFile.log(TAG, "WARNING: I/O exception while reverse geocoding: " + e.getLocalizedMessage());
             if(e.getLocalizedMessage().equalsIgnoreCase("service not available")) {
-                Log.d(TAG, "disabling service");
+                DebugFile.log(TAG, "disabling service");
                 isAvail = false;
                 return NOT_AVAILABLE;
             }

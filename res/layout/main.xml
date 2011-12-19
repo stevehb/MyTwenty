@@ -90,6 +90,8 @@
             android:gravity="center"
             android:orientation="vertical" >
 
+            <!-- The address edit box -->
+
             <TextView
                 android:id="@+id/textView2"
                 android:layout_width="wrap_content"
@@ -104,10 +106,10 @@
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="12dp"
                 android:background="#44000000"
-                android:textColor="#FFFFFFFF"
                 android:gravity="center_vertical"
                 android:inputType="none"
-                android:lines="4" />
+                android:lines="4"
+                android:textColor="#FFFFFFFF" />
         </LinearLayout>
     </LinearLayout>
 
@@ -118,10 +120,12 @@
         android:layout_marginTop="16dp"
         android:gravity="center" >
 
+        <!-- The map view -->
+
         <com.google.android.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="128dp"
+            android:layout_height="160dp"
             android:layout_marginLeft="12dp"
             android:layout_marginRight="12dp"
             android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw" />
@@ -135,6 +139,8 @@
         android:layout_marginRight="12dp"
         android:layout_marginTop="16dp"
         android:gravity="center" >
+
+        <!-- The two buttons -->
 
         <ToggleButton
             android:id="@+id/btnContinuous"

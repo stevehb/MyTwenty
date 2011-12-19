@@ -9,21 +9,25 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.Settings;
 import android.widget.Toast;
 
 class TwentyListener implements LocationListener {
     private static final String TAG = "20: " + TwentyListener.class.getSimpleName();
     private static final int TWO_MINUTES = 1000 * 60 * 2;
 
+    double lat = 0.0, lon = 0.0;
+
+    private boolean isNetAvail = false;
+    private boolean isNetLive = false;
+    private boolean isGpsAvail = false;
     private boolean isGpsLive = false;
     private boolean isContinuous = false;
     private boolean dialogDisplayed = false;
 
-    private Location bestLocation;
-
     private ProgressDialog progressDialog;
 
+    private Location bestLocation;
     private final LocationManager locManager;
     private final MyTwentyActivity activity;
     private final ReverseGeocoder geoService;
@@ -33,28 +37,15 @@ class TwentyListener implements LocationListener {
         activity = act;
         locManager = (LocationManager)(activity.getSystemService(Context.LOCATION_SERVICE));
         geoService = new ReverseGeocoder(activity);
-
-        Location passLoc = locManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        Location netLoc = locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        Location gpsLoc= locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-        if(isBetterLocation(passLoc))
-            bestLocation = passLoc;
-        if(isBetterLocation(netLoc))
-            bestLocation = netLoc;
-        if(isBetterLocation(gpsLoc))
-            bestLocation = gpsLoc;
-        onLocationChanged(bestLocation);
-
-        activateListener();     // references 'this'!
-        if(!isContinuous)
-            displayNotification();
     }
 
     @Override
     public void onLocationChanged(Location loc) {
-        Log.d(TAG, "got " + loc.getProvider() + " location: (" + loc.getLatitude() + ", " +
-                loc.getLongitude() + ") accuracy=" + loc.getAccuracy() + " time=" + loc.getTime());
+        if(loc != null) {
+            DebugFile.log(TAG, "onLocationChanged(): " + loc.getProvider() + " location: (" + loc.getLatitude() + ", " +
+                    loc.getLongitude() + ") accuracy=" + loc.getAccuracy() + " time=" + loc.getTime());
+        }
+
         // first test the incoming location
         if(isBetterLocation(loc))
             bestLocation = loc;
@@ -62,63 +53,130 @@ class TwentyListener implements LocationListener {
             return;
 
         // grab the lat/lon and set the UI components
-        double lat = bestLocation.getLatitude();
-        double lon = bestLocation.getLongitude();
+        lat = bestLocation.getLatitude();
+        lon = bestLocation.getLongitude();
         activity.setLatLon(lat, lon);
         activity.setAddress(geoService.getAddress(lat, lon));
-        activity.setMap(lat, lon);
+        activity.setMap(loc.getAccuracy());
 
-        if(!isContinuous)
-            deactivateListener();
-        if(dialogDisplayed) {
-            Log.d(TAG, "dialog canceled by LocationChange event");
-            hideNotification();
+        // wait for gps results, unless they are not available or these are gps results
+        if(!isGpsAvail || loc.getProvider().equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
+            if(!isContinuous) {
+                DebugFile.log(TAG, "onLocationChanged() is deactivating the listener");
+                deactivateListeners();
+            }
+            if(dialogDisplayed) {
+                DebugFile.log(TAG, "dialog canceled by LocationChange event");
+                hideNotification();
+            }
         }
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-        deactivateListener();
+        if(provider.equalsIgnoreCase(LocationManager.NETWORK_PROVIDER)) {
+            isNetAvail = false;
+        } else if(provider.equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
+            isGpsAvail = false;
+        }
+        if(!isNetAvail && !isGpsAvail) {
+            DebugFile.log(TAG, "onProviderDisabled() is deactivating the listener: isNetAvail=" + isNetAvail + ", isGpsAvail=" + isGpsAvail);
+            deactivateListeners();
+        }
+        DebugFile.log(TAG, "disabled provider " + provider);
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        if(isContinuous || isGpsLive)
-            activateListener();
+        if(provider.equalsIgnoreCase(LocationManager.NETWORK_PROVIDER)) {
+            isNetAvail = true;
+        } else if(provider.equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
+            isGpsAvail = true;
+        }
+        DebugFile.log(TAG, "enabled provider " + provider);
     }
 
+    /* This method is called only on Android 1.6. See
+     * http://code.google.com/p/android/issues/detail?id=9433
+     */
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
+        DebugFile.log(TAG, "onStatusChanged(" + provider + ")");
         Toast toast;
         switch(status) {
         case LocationProvider.OUT_OF_SERVICE:
-            Log.d(TAG, "gps service is unavail, isContinuous=" + isContinuous);
-            toast = Toast.makeText(activity, R.string.toast_gps_unavail, Toast.LENGTH_SHORT);
-            toast.show();
-            deactivateListener();
+            DebugFile.log(TAG, provider + " service is out of service, isContinuous=" + isContinuous);
+            if(provider.equalsIgnoreCase(LocationManager.NETWORK_PROVIDER)) {
+                isNetAvail = false;
+                toast = Toast.makeText(activity, R.string.toast_net_unavail, Toast.LENGTH_SHORT);
+                toast.show();
+            } else if(provider.equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
+                isGpsAvail = false;
+                toast = Toast.makeText(activity, R.string.toast_gps_unavail, Toast.LENGTH_SHORT);
+                toast.show();
+            }
             break;
 
         case LocationProvider.TEMPORARILY_UNAVAILABLE:
-            Log.d(TAG, "gps service is tmp unavail, isContinuous=" + isContinuous);
-            deactivateListener();
+            DebugFile.log(TAG, provider + " service is temp unavail, isContinuous=" + isContinuous);
             break;
 
         case LocationProvider.AVAILABLE:
-            Log.d(TAG, "gps service is totes avail, isContinuous=" + isContinuous);
-            toast = Toast.makeText(activity, R.string.toast_gps_avail, Toast.LENGTH_SHORT);
-            toast.show();
-            if(isContinuous || isGpsLive)
-                activateListener();
+            DebugFile.log(TAG, provider + " service is now avail, isContinuous=" + isContinuous);
+            if(provider.equalsIgnoreCase(LocationManager.NETWORK_PROVIDER)) {
+                isNetAvail = true;
+                toast = Toast.makeText(activity, R.string.toast_net_avail, Toast.LENGTH_SHORT);
+                toast.show();
+            } else if(provider.equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
+                isGpsAvail = true;
+                toast = Toast.makeText(activity, R.string.toast_gps_avail, Toast.LENGTH_SHORT);
+                toast.show();
+            }
             break;
         }
     }
 
-    void deactivateListener() {
-        if(isGpsLive) {
-            Log.d(TAG, "deactivating listener");
+    void activateListeners() {
+        if(isNetAvail && !isNetLive) {
+            DebugFile.log(TAG, "activating net listener");
+            locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+            isNetLive = true;
+        }
+        if(isGpsAvail && !isGpsLive) {
+            DebugFile.log(TAG, "activating gps listener");
+            locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+            isGpsLive = true;
+        }
+    }
+
+    void deactivateListeners() {
+        if(isGpsLive || isNetLive) {
+            DebugFile.log(TAG, "now deactivating the listener");
             locManager.removeUpdates(this);
             isGpsLive = false;
+            isNetLive = false;
         }
+    }
+
+    void resume() {
+        DebugFile.log(TAG, "resuming the listener");
+
+        String provider = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        DebugFile.log(TAG, "locations providers allowed: " + provider);
+        // find out who is available
+        isNetAvail = locManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        isGpsAvail = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        DebugFile.log(TAG, "tested providers: isNetAvail=" + isNetAvail + ", isGpsAvail=" + isGpsAvail);
+
+        // activating the listener will enable getLastKnownLocation() to work
+        activateListeners();
+        if(!isContinuous)
+            displayNotification();
+
+        // send update with possible known locations
+        onLocationChanged(locManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
+        onLocationChanged(locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+        onLocationChanged(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
     }
 
     void hideNotification() {
@@ -130,7 +188,7 @@ class TwentyListener implements LocationListener {
     }
 
     void refresh() {
-        activateListener();
+        activateListeners();
         if(!isContinuous)
             displayNotification();
     }
@@ -138,23 +196,21 @@ class TwentyListener implements LocationListener {
     void setContinuous(boolean continuous) {
         isContinuous = continuous;
         if(isContinuous)
-            activateListener();
-        if(!isContinuous)
-            deactivateListener();
-    }
-
-    void activateListener() {
-        if(!isGpsLive) {
-            Log.d(TAG, "activating listener");
-            locManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            //locManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-            isGpsLive = true;
+            activateListeners();
+        if(!isContinuous) {
+            DebugFile.log(TAG, "setContinuous() is deactivating the listener");
+            deactivateListeners();
         }
     }
 
     private void displayNotification() {
         if(dialogDisplayed)
             return;
+
+        /* TODO
+         * Update these messages dynamically to better reflect what
+         * information is coming in from location providers.
+         */
         progressDialog = new ProgressDialog(activity);
         progressDialog.setTitle(activity.getString(R.string.progress_dialog_title));
         progressDialog.setMessage(activity.getString(R.string.progress_dialog_message));
@@ -164,8 +220,9 @@ class TwentyListener implements LocationListener {
                 new OnCancelListener() {
                     @Override
                     public void onCancel(DialogInterface dialog) {
-                        Log.d(TAG, "dialog canceled by user");
-                        deactivateListener();
+                        DebugFile.log(TAG, "dialog canceled by user");
+                        DebugFile.log(TAG, "onCancelListener() is deactivating the listener");
+                        deactivateListeners();
                         dialogDisplayed = false;
                     }
                 });
@@ -177,16 +234,12 @@ class TwentyListener implements LocationListener {
      * http://developer.android.com/guide/topics/location/obtaining-user-location.html
      */
     private boolean isBetterLocation(Location location) {
-        Log.d(TAG, "comparing " + location.getProvider() + " location: (" + location.getLatitude() + ", " +
-                location.getLongitude() + ") accuracy=" + location.getAccuracy() + " time=" + location.getTime());
-
-        if(bestLocation == null) {
-            Log.d(TAG, "accepting new location because no current location");
-            return true;
-        }
-        else if(location == null) {
-            Log.d(TAG, "rejecting new location because it is null");
+        if(location == null) {
+            DebugFile.log(TAG, "rejecting new location because it is null");
             return false;
+        } else if(bestLocation == null) {
+            DebugFile.log(TAG, "accepting new location because no current location");
+            return true;
         }
 
         // Check whether the new location fix is newer or older
@@ -198,11 +251,11 @@ class TwentyListener implements LocationListener {
         // If it's been more than two minutes since the current location, use the new location
         // because the user has likely moved
         if(isSignificantlyNewer) {
-            Log.d(TAG, "accepting new location because it is significantly newer");
+            DebugFile.log(TAG, "accepting new location because it is significantly newer");
             return true;
             // If the new location is more than two minutes older, it must be worse
         } else if(isSignificantlyOlder) {
-            Log.d(TAG, "rejecting new location because it is significantly older");
+            DebugFile.log(TAG, "rejecting new location because it is significantly older");
             return false;
         }
 
@@ -218,16 +271,16 @@ class TwentyListener implements LocationListener {
 
         // Determine location quality using a combination of timeliness and accuracy
         if(isMoreAccurate) {
-            Log.d(TAG, "accepting new location because it is more accurate");
+            DebugFile.log(TAG, "accepting new location because it is more accurate");
             return true;
         } else if(isNewer && !isLessAccurate) {
-            Log.d(TAG, "accepting new location because it is newer and equally accurate");
+            DebugFile.log(TAG, "accepting new location because it is newer and equally accurate");
             return true;
         } else if(isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-            Log.d(TAG, "accepting new location because it is newer, not less accurate, and from same provider");
+            DebugFile.log(TAG, "accepting new location because it is newer, not less accurate, and from same provider");
             return true;
         }
-        Log.d(TAG, "rejecting new location because it matched no acceptance criteria");
+        DebugFile.log(TAG, "rejecting new location because it matched no acceptance criteria");
         return false;
     }
 

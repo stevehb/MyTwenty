@@ -1,10 +1,14 @@
 package net.cruciblesoftware.MyTwenty;
 
+import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.ClipboardManager;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -20,7 +24,8 @@ import com.google.android.maps.MapView;
 
 public class MyTwentyActivity extends MapActivity {
     private static final String TAG = "20: " + MyTwentyActivity.class.getSimpleName();
-    //private final String KEY_CONTINUOUS = "continuous";
+
+    private int zoomLevel = 18;
 
     private EditText txtAddress;
     private TextView txtLat, txtLon;
@@ -32,20 +37,17 @@ public class MyTwentyActivity extends MapActivity {
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
 
+        /* TODO
+         * Add views to layout to display accuracy and maybe satellite count.
+         */
+
         setContentView(R.layout.main);
-        txtAddress = (EditText)(findViewById(R.id.txtAddress));
         txtLat = (TextView)(findViewById(R.id.txtLatValue));
         txtLon = (TextView)(findViewById(R.id.txtLonValue));
 
-        // set up edit box to be display only
+        // set up address box
+        txtAddress = (EditText)(findViewById(R.id.txtAddress));
         txtAddress.setFocusable(false);
-        mapView = (MapView)(findViewById(R.id.map));
-        mapView.setBuiltInZoomControls(false);
-
-        // create a location listener to get GPS updates
-        locListener = new TwentyListener(this);
-
-        // The address text box
         txtAddress.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
@@ -58,6 +60,30 @@ public class MyTwentyActivity extends MapActivity {
                         R.string.toast_address_copied, Toast.LENGTH_SHORT);
                 toast.show();
                 return true;
+            }
+        });
+
+        // set up the map
+        mapView = (MapView)(findViewById(R.id.map));
+        mapView.setBuiltInZoomControls(true);
+        mapView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() != MotionEvent.ACTION_DOWN)
+                    return true;
+
+                // compose the string
+                String uri;
+                if(txtAddress.toString().isEmpty()) {
+                    uri = "geo:" + locListener.lat + "," + locListener.lon + "?" + "z=" + zoomLevel;
+                } else {
+                    uri = "geo:0,0?q=" + locListener.lat + "," + locListener.lon + "(" + txtAddress.toString() + ")";
+                }
+                DebugFile.log(TAG, "loading map using uri=" + uri);
+
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(uri));
+                MyTwentyActivity.this.startActivity(intent);
+                return false;
             }
         });
 
@@ -77,6 +103,9 @@ public class MyTwentyActivity extends MapActivity {
             }
         });
 
+        // create a location listener to get GPS updates
+        locListener = new TwentyListener(this);
+
         //if(bundle != null)
         //    locListener.setContinuous(bundle.getBoolean(KEY_CONTINUOUS, false));
     }
@@ -91,10 +120,24 @@ public class MyTwentyActivity extends MapActivity {
         txtAddress.setText(str);
     }
 
-    void setMap(double lat, double lon) {
+    void setMap(float accuracy) {
+        int lat = (int)(locListener.lat * 1000000);
+        int lon = (int)(locListener.lon * 1000000);
+        zoomLevel = 18;
         MapController mc = mapView.getController();
-        mc.setCenter(new GeoPoint((int)(lat * 1000000), (int)(lon * 1000000)));
-        mc.setZoom(18);
+        mc.setCenter(new GeoPoint(lat, lon));
+
+        /* TODO
+         * Instead of a static zoom level, calculate a lat/lon range, given
+         * that the accuracy parameter is in meters. The zoom in should
+         * probably be capped at about 18.
+         * Use the destination point calculation from
+         * http://www.movable-type.co.uk/scripts/latlong.html
+         * and call mc.zoomToSpan(latSpanE6, lonSpanE6). Also, get the zoom
+         * level from mapView.getZoomLevel() and set the member variable in
+         * case the map link needs it later.
+         */
+        mc.setZoom(zoomLevel);
     }
 
     //@Override
@@ -105,16 +148,17 @@ public class MyTwentyActivity extends MapActivity {
 
     @Override
     public void onPause() {
-        locListener.deactivateListener();
+        DebugFile.log(TAG, "pausing listener");
+        locListener.setContinuous(false);
+        locListener.deactivateListeners();
         locListener.hideNotification();
         super.onPause();
     }
 
     @Override
     public void onResume() {
-        locListener.setContinuous(false);
-        locListener.deactivateListener();
-        locListener.hideNotification();
+        DebugFile.log(TAG, "calling listener resume");
+        locListener.resume();
         super.onResume();
     }
 
