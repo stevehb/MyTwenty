@@ -6,7 +6,7 @@
     <string name="lon_label">Lon:</string>
     <string name="na">N/A</string>
     <string name="address_label">You Are Here</string>
-    <string name="btn_refresh_label">Refresh</string>
+    <string name="btn_refresh_label">Update</string>
     <string name="geo_not_available">Geocoding service is not available on this phone.</string>
     <string name="geo_no_address">The geocoder found no address!</string>
     <string name="geo_io_exception">ERROR: I/O Exception encountered while reverse geocoding: </string>

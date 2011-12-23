@@ -1,5 +1,7 @@
 package net.cruciblesoftware.MyTwenty;
 
+import java.text.DecimalFormat;
+
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.net.Uri;
@@ -25,17 +27,26 @@ import com.google.android.maps.MapView;
 public class MyTwentyActivity extends MapActivity {
     private static final String TAG = "20: " + MyTwentyActivity.class.getSimpleName();
 
-    private int zoomLevel = 18;
+    private static final int EARTH_RADIUS = 6371000;
+    private static final int MAX_ZOOM = 18;
+    private int zoomLevel = MAX_ZOOM;
+    private DecimalFormat formatLatLon;
 
     private EditText txtAddress;
     private TextView txtLat, txtLon;
     private MapView mapView;
+    private ToggleButton btnContinuous;
 
+    private ReverseGeocoder geocoder;
     private TwentyListener locListener;
 
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+
+        geocoder = new ReverseGeocoder(this);
+        locListener = new TwentyListener(this, geocoder);
+        formatLatLon = new DecimalFormat("0.000000");
 
         /* TODO
          * Add views to layout to display accuracy and maybe satellite count.
@@ -66,6 +77,7 @@ public class MyTwentyActivity extends MapActivity {
         // set up the map
         mapView = (MapView)(findViewById(R.id.map));
         mapView.setBuiltInZoomControls(true);
+        mapView.setSatellite(true);
         mapView.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -74,10 +86,13 @@ public class MyTwentyActivity extends MapActivity {
 
                 // compose the string
                 String uri;
-                if(txtAddress.toString().isEmpty()) {
-                    uri = "geo:" + locListener.lat + "," + locListener.lon + "?" + "z=" + zoomLevel;
+                double lat = locListener.bestLocation.getLatitude();
+                double lon = locListener.bestLocation.getLongitude();
+                if(geocoder.hasAddress()) {
+                    String address = txtAddress.getText().toString();
+                    uri = "geo:0,0?q=" + lat + "," + lon + " (" + address + ")";
                 } else {
-                    uri = "geo:0,0?q=" + locListener.lat + "," + locListener.lon + "(" + txtAddress.toString() + ")";
+                    uri = "geo:" + lat + "," + lon + "?" + "z=" + zoomLevel;
                 }
                 DebugFile.log(TAG, "loading map using uri=" + uri);
 
@@ -95,61 +110,72 @@ public class MyTwentyActivity extends MapActivity {
                 locListener.refresh();
             }
         });
-        ToggleButton continuous = (ToggleButton)(findViewById(R.id.btnContinuous));
-        continuous.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        btnContinuous = (ToggleButton)(findViewById(R.id.btnContinuous));
+        btnContinuous.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 locListener.setContinuous(isChecked);
             }
         });
-
-        // create a location listener to get GPS updates
-        locListener = new TwentyListener(this);
-
-        //if(bundle != null)
-        //    locListener.setContinuous(bundle.getBoolean(KEY_CONTINUOUS, false));
     }
 
-
     void setLatLon(double lat, double lon) {
-        txtLat.setText(Double.toString(lat));
-        txtLon.setText(Double.toString(lon));
+        txtLat.setText(formatLatLon.format(lat));
+        txtLon.setText(formatLatLon.format(lon));
     }
 
     void setAddress(String str) {
         txtAddress.setText(str);
     }
 
-    void setMap(float accuracy) {
-        int lat = (int)(locListener.lat * 1000000);
-        int lon = (int)(locListener.lon * 1000000);
-        zoomLevel = 18;
+    void setMap(double lat, double lon, double accuracy) {
         MapController mc = mapView.getController();
-        mc.setCenter(new GeoPoint(lat, lon));
+        mc.setCenter(new GeoPoint((int)(lat*1000000), (int)(lon*1000000)));
 
-        /* TODO
-         * Instead of a static zoom level, calculate a lat/lon range, given
-         * that the accuracy parameter is in meters. The zoom in should
-         * probably be capped at about 18.
-         * Use the destination point calculation from
-         * http://www.movable-type.co.uk/scripts/latlong.html
-         * and call mc.zoomToSpan(latSpanE6, lonSpanE6). Also, get the zoom
-         * level from mapView.getZoomLevel() and set the member variable in
-         * case the map link needs it later.
-         */
+        // the calculations below don't yet work well enough
+        // so short circuit that until later
+        zoomLevel = MAX_ZOOM;
         mc.setZoom(zoomLevel);
-    }
+        if(true) return;
 
-    //@Override
-    //protected void onSaveInstanceState(Bundle outState) {
-    //    super.onSaveInstanceState(outState);
-    //    outState.putBoolean(KEY_CONTINUOUS, locListener.isContinuous);
-    //}
+
+        // otherwise calculate lat/lon radius for zoom
+        // from http://www.movable-type.co.uk/scripts/latlong.html
+        final double angDist = accuracy / EARTH_RADIUS;
+        final double bearing = 0;
+        final double lat1 = Math.toRadians(lat);
+        final double lon1 = Math.toRadians(lon);
+        final double cosLat1 = Math.cos(lat1);
+        final double sinLat1 = Math.sin(lat1);
+        final double cosAngDist = Math.cos(angDist);
+        final double sinAngDist = Math.sin(angDist);
+        final double lat2 = Math.asin(sinLat1*cosAngDist + cosLat1*sinAngDist*Math.cos(bearing));
+        final double lon2 = lon1 + Math.atan2(Math.sin(bearing)*sinAngDist*cosLat1, cosAngDist - sinLat1*Math.sin(lat2));
+
+        final double latSpan = Math.abs(lat2-lat1) * 1200;
+        final double lonSpan = Math.abs(lon2-lon1) * 1200;
+        mc.zoomToSpan((int)(latSpan*1000000), (int)(lonSpan*1000000));
+        zoomLevel = mapView.getZoomLevel();
+        if(zoomLevel > MAX_ZOOM) {
+            zoomLevel = MAX_ZOOM;
+            mc.setZoom(zoomLevel);
+        }
+
+        // check against max zoom
+        if(accuracy <= 1.0) {
+            zoomLevel = MAX_ZOOM;
+            mc.setZoom(zoomLevel);
+        }
+
+        DebugFile.log(TAG, "point (" + lat1 + "," + lon1 + ") with accuracy=" + accuracy +
+                " gives latSpan=" + latSpan + ", lonSpan=" + lonSpan + ", zoomLevel=" + zoomLevel);
+    }
 
     @Override
     public void onPause() {
         DebugFile.log(TAG, "pausing listener");
         locListener.setContinuous(false);
+        btnContinuous.setChecked(false);
         locListener.deactivateListeners();
         locListener.hideNotification();
         super.onPause();
@@ -158,7 +184,7 @@ public class MyTwentyActivity extends MapActivity {
     @Override
     public void onResume() {
         DebugFile.log(TAG, "calling listener resume");
-        locListener.resume();
+        locListener.loadLastKnown();
         super.onResume();
     }
 

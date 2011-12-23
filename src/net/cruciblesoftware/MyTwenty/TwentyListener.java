@@ -16,8 +16,6 @@ class TwentyListener implements LocationListener {
     private static final String TAG = "20: " + TwentyListener.class.getSimpleName();
     private static final int TWO_MINUTES = 1000 * 60 * 2;
 
-    double lat = 0.0, lon = 0.0;
-
     private boolean isNetAvail = false;
     private boolean isNetLive = false;
     private boolean isGpsAvail = false;
@@ -27,16 +25,16 @@ class TwentyListener implements LocationListener {
 
     private ProgressDialog progressDialog;
 
-    private Location bestLocation;
+    Location bestLocation;
     private final LocationManager locManager;
     private final MyTwentyActivity activity;
     private final ReverseGeocoder geoService;
 
-    TwentyListener(MyTwentyActivity act) {
+    TwentyListener(MyTwentyActivity act, ReverseGeocoder geocoder) {
         super();
         activity = act;
         locManager = (LocationManager)(activity.getSystemService(Context.LOCATION_SERVICE));
-        geoService = new ReverseGeocoder(activity);
+        geoService = geocoder;
     }
 
     @Override
@@ -53,11 +51,11 @@ class TwentyListener implements LocationListener {
             return;
 
         // grab the lat/lon and set the UI components
-        lat = bestLocation.getLatitude();
-        lon = bestLocation.getLongitude();
+        double lat = bestLocation.getLatitude();
+        double lon = bestLocation.getLongitude();
         activity.setLatLon(lat, lon);
-        activity.setAddress(geoService.getAddress(lat, lon));
-        activity.setMap(loc.getAccuracy());
+        activity.setMap(lat, lon, bestLocation.getAccuracy());
+        geoService.setAddress(activity, lat, lon);
 
         // wait for gps results, unless they are not available or these are gps results
         if(!isGpsAvail || loc.getProvider().equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {
@@ -96,7 +94,7 @@ class TwentyListener implements LocationListener {
         DebugFile.log(TAG, "enabled provider " + provider);
     }
 
-    /* This method is called only on Android 1.6. See
+    /* I think this method is called only on Android 1.6. See
      * http://code.google.com/p/android/issues/detail?id=9433
      */
     @Override
@@ -158,7 +156,7 @@ class TwentyListener implements LocationListener {
         }
     }
 
-    void resume() {
+    void loadLastKnown() {
         DebugFile.log(TAG, "resuming the listener");
 
         String provider = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
@@ -167,11 +165,6 @@ class TwentyListener implements LocationListener {
         isNetAvail = locManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         isGpsAvail = locManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         DebugFile.log(TAG, "tested providers: isNetAvail=" + isNetAvail + ", isGpsAvail=" + isGpsAvail);
-
-        // activating the listener will enable getLastKnownLocation() to work
-        activateListeners();
-        if(!isContinuous)
-            displayNotification();
 
         // send update with possible known locations
         onLocationChanged(locManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
