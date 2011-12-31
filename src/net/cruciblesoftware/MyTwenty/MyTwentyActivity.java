@@ -7,10 +7,8 @@ import android.graphics.PixelFormat;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.ClipboardManager;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
@@ -25,7 +23,8 @@ import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 
 public class MyTwentyActivity extends MapActivity {
-    private static final String TAG = "20: " + MyTwentyActivity.class.getSimpleName();
+    private static final String TAG = "20: "
+            + MyTwentyActivity.class.getSimpleName();
 
     private static final int EARTH_RADIUS = 6371000;
     private static final int MAX_ZOOM = 18;
@@ -48,24 +47,24 @@ public class MyTwentyActivity extends MapActivity {
         locListener = new TwentyListener(this, geocoder);
         formatLatLon = new DecimalFormat("0.000000");
 
-        /* TODO
-         * Add views to layout to display accuracy and maybe satellite count.
+        /*
+         * TODO Add views to layout to display accuracy and maybe satellite
+         * count.
          */
 
         setContentView(R.layout.main);
-        txtLat = (TextView)(findViewById(R.id.txtLatValue));
-        txtLon = (TextView)(findViewById(R.id.txtLonValue));
+        txtLat = (TextView) (findViewById(R.id.txtLatValue));
+        txtLon = (TextView) (findViewById(R.id.txtLonValue));
 
         // set up address box
-        txtAddress = (EditText)(findViewById(R.id.txtAddress));
+        txtAddress = (EditText) (findViewById(R.id.txtAddress));
         txtAddress.setFocusable(false);
         txtAddress.setOnLongClickListener(new OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                if(txtAddress.toString().isEmpty())
+                if (txtAddress.toString().isEmpty())
                     return true;
-                ClipboardManager clipboard =
-                        (ClipboardManager)(getSystemService(CLIPBOARD_SERVICE));
+                ClipboardManager clipboard = (ClipboardManager) (getSystemService(CLIPBOARD_SERVICE));
                 clipboard.setText(txtAddress.toString());
                 Toast toast = Toast.makeText(MyTwentyActivity.super,
                         R.string.toast_address_copied, Toast.LENGTH_SHORT);
@@ -75,20 +74,17 @@ public class MyTwentyActivity extends MapActivity {
         });
 
         // set up the map
-        mapView = (MapView)(findViewById(R.id.map));
+        mapView = (MapView) (findViewById(R.id.map));
         mapView.setBuiltInZoomControls(true);
         mapView.setSatellite(true);
-        mapView.setOnTouchListener(new OnTouchListener() {
+        mapView.setOnLongClickListener(new OnLongClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() != MotionEvent.ACTION_DOWN)
-                    return true;
-
+            public boolean onLongClick(View v) {
                 // compose the string
                 String uri;
                 double lat = locListener.bestLocation.getLatitude();
                 double lon = locListener.bestLocation.getLongitude();
-                if(geocoder.hasAddress()) {
+                if (geocoder.hasAddress()) {
                     String address = txtAddress.getText().toString();
                     uri = "geo:0,0?q=" + lat + "," + lon + " (" + address + ")";
                 } else {
@@ -103,17 +99,18 @@ public class MyTwentyActivity extends MapActivity {
         });
 
         // Refresh and continuous buttons
-        Button refresh = (Button)(findViewById(R.id.btnRefresh));
+        Button refresh = (Button) (findViewById(R.id.btnRefresh));
         refresh.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 locListener.refresh();
             }
         });
-        btnContinuous = (ToggleButton)(findViewById(R.id.btnContinuous));
+        btnContinuous = (ToggleButton) (findViewById(R.id.btnContinuous));
         btnContinuous.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+            public void onCheckedChanged(CompoundButton buttonView,
+                    boolean isChecked) {
                 locListener.setContinuous(isChecked);
             }
         });
@@ -130,14 +127,14 @@ public class MyTwentyActivity extends MapActivity {
 
     void setMap(double lat, double lon, double accuracy) {
         MapController mc = mapView.getController();
-        mc.setCenter(new GeoPoint((int)(lat*1000000), (int)(lon*1000000)));
+        mc.setCenter(new GeoPoint((int) (lat * 1000000), (int) (lon * 1000000)));
 
         // the calculations below don't yet work well enough
         // so short circuit that until later
         zoomLevel = MAX_ZOOM;
         mc.setZoom(zoomLevel);
-        if(true) return;
-
+        if (true)
+            return;
 
         // otherwise calculate lat/lon radius for zoom
         // from http://www.movable-type.co.uk/scripts/latlong.html
@@ -149,26 +146,30 @@ public class MyTwentyActivity extends MapActivity {
         final double sinLat1 = Math.sin(lat1);
         final double cosAngDist = Math.cos(angDist);
         final double sinAngDist = Math.sin(angDist);
-        final double lat2 = Math.asin(sinLat1*cosAngDist + cosLat1*sinAngDist*Math.cos(bearing));
-        final double lon2 = lon1 + Math.atan2(Math.sin(bearing)*sinAngDist*cosLat1, cosAngDist - sinLat1*Math.sin(lat2));
+        final double lat2 = Math.asin(sinLat1 * cosAngDist + cosLat1
+                * sinAngDist * Math.cos(bearing));
+        final double lon2 = lon1
+                + Math.atan2(Math.sin(bearing) * sinAngDist * cosLat1,
+                        cosAngDist - sinLat1 * Math.sin(lat2));
 
-        final double latSpan = Math.abs(lat2-lat1) * 1200;
-        final double lonSpan = Math.abs(lon2-lon1) * 1200;
-        mc.zoomToSpan((int)(latSpan*1000000), (int)(lonSpan*1000000));
+        final double latSpan = Math.abs(lat2 - lat1) * 1200;
+        final double lonSpan = Math.abs(lon2 - lon1) * 1200;
+        mc.zoomToSpan((int) (latSpan * 1000000), (int) (lonSpan * 1000000));
         zoomLevel = mapView.getZoomLevel();
-        if(zoomLevel > MAX_ZOOM) {
+        if (zoomLevel > MAX_ZOOM) {
             zoomLevel = MAX_ZOOM;
             mc.setZoom(zoomLevel);
         }
 
         // check against max zoom
-        if(accuracy <= 1.0) {
+        if (accuracy <= 1.0) {
             zoomLevel = MAX_ZOOM;
             mc.setZoom(zoomLevel);
         }
 
-        DebugFile.log(TAG, "point (" + lat1 + "," + lon1 + ") with accuracy=" + accuracy +
-                " gives latSpan=" + latSpan + ", lonSpan=" + lonSpan + ", zoomLevel=" + zoomLevel);
+        DebugFile.log(TAG, "point (" + lat1 + "," + lon1 + ") with accuracy="
+                + accuracy + " gives latSpan=" + latSpan + ", lonSpan="
+                + lonSpan + ", zoomLevel=" + zoomLevel);
     }
 
     @Override

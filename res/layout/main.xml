@@ -19,6 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
+            android:contentDescription="@string/icon_content_desc"
             android:src="@drawable/icon_big" />
 
         <LinearLayout
@@ -44,7 +45,7 @@
                     android:textAppearance="?android:attr/textAppearanceMedium" />
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/textView2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="3dp"
@@ -78,46 +79,70 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout5"
+        android:id="@+id/linearLayout6"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" >
+        android:layout_marginTop="@dimen/vertical_spacer"
+        android:gravity="center"
+        android:orientation="vertical" >
+
+        <!-- The address edit box -->
 
         <LinearLayout
-            android:id="@+id/linearLayout6"
+            android:id="@+id/linearLayout5"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:orientation="vertical" >
-
-            <!-- The address edit box -->
+            android:gravity="left" >
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/txtAddressLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/address_label"
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="14dp"
+                android:gravity="left"
+                android:text="@string/address_label_new"
                 android:textAppearance="?android:attr/textAppearanceLarge" />
 
-            <EditText
-                android:id="@+id/txtAddress"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/txtAddressAge"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="12dp"
-                android:layout_marginRight="12dp"
-                android:background="#44000000"
-                android:gravity="center_vertical"
-                android:inputType="none"
-                android:lines="4"
-                android:textColor="#FFFFFFFF" />
+                android:layout_gravity="bottom"
+                android:layout_marginLeft="2dp"
+                android:text="@string/address_label_age"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:visibility="invisible" />
         </LinearLayout>
+
+        <EditText
+            android:id="@+id/txtAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/outer_side_margin"
+            android:layout_marginRight="@dimen/outer_side_margin"
+            android:background="#44000000"
+            android:gravity="center_vertical"
+            android:inputType="none"
+            android:lines="4"
+            android:paddingLeft="18dp"
+            android:textColor="#FFFFFFFF" />
+
+        <TextView
+            android:id="@+id/txtAddressAccuracy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:layout_marginLeft="@dimen/outer_side_margin"
+            android:text="@string/address_label_accuracy"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout5"
+        android:id="@+id/linearLayout7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/vertical_spacer"
         android:gravity="center" >
 
         <!-- The map view -->
@@ -126,18 +151,18 @@
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="160dp"
-            android:layout_marginLeft="12dp"
-            android:layout_marginRight="12dp"
+            android:layout_marginLeft="@dimen/outer_side_margin"
+            android:layout_marginRight="@dimen/outer_side_margin"
             android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw" />
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout5"
+        android:id="@+id/linearLayout8"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="12dp"
-        android:layout_marginRight="12dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginLeft="@dimen/outer_side_margin"
+        android:layout_marginRight="@dimen/outer_side_margin"
+        android:layout_marginTop="@dimen/vertical_spacer"
         android:gravity="center" >
 
         <!-- The two buttons -->
@@ -146,7 +171,6 @@
             android:id="@+id/btnContinuous"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:text="ToggleButton"
             android:textOff="@string/btn_continuous_label"
             android:textOn="@string/btn_continuous_label" />
 

@@ -2,10 +2,14 @@
 <resources>
 
     <string name="app_name">MyTwenty</string>
+    <string name="icon_content_desc">App Icon</string>
     <string name="lat_label">Lat:</string>
     <string name="lon_label">Lon:</string>
     <string name="na">N/A</string>
-    <string name="address_label">You Are Here</string>
+    <string name="address_label_new">You Are Here</string>
+    <string name="address_label_old">You Were Here</string>
+    <string name="address_label_age">(at %1$d:%2$d %3$s)</string>
+    <string name="address_label_accuracy">Source: %1$s (accurate within %2$d meters)</string>
     <string name="btn_refresh_label">Update</string>
     <string name="geo_not_available">Geocoding service is not available on this phone.</string>
     <string name="geo_no_address">The geocoder found no address!</string>
