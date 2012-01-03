@@ -28,13 +28,11 @@ class TwentyListener implements LocationListener {
     Location bestLocation;
     private final LocationManager locManager;
     private final MyTwentyActivity activity;
-    private final ReverseGeocoder geoService;
 
-    TwentyListener(MyTwentyActivity act, ReverseGeocoder geocoder) {
+    TwentyListener(MyTwentyActivity act) {
         super();
         activity = act;
         locManager = (LocationManager)(activity.getSystemService(Context.LOCATION_SERVICE));
-        geoService = geocoder;
     }
 
     @Override
@@ -55,7 +53,7 @@ class TwentyListener implements LocationListener {
         double lon = bestLocation.getLongitude();
         activity.setLatLon(lat, lon);
         activity.setMap(lat, lon, bestLocation.getAccuracy());
-        geoService.setAddress(activity, lat, lon);
+        activity.setAddress(bestLocation);
 
         // wait for gps results, unless they are not available or these are gps results
         if(!isGpsAvail || loc.getProvider().equalsIgnoreCase(LocationManager.GPS_PROVIDER)) {

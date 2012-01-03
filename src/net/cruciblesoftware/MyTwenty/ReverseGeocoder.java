@@ -7,6 +7,7 @@ import java.util.Locale;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.AsyncTask;
 
 class ReverseGeocoder {
@@ -19,17 +20,19 @@ class ReverseGeocoder {
     private final String NO_ADDRESS;
     private final String IO_EXCEPTION;
 
-    private class GetAddressTask extends AsyncTask<Double, Void, String> {
-        private final MyTwentyActivity my20;
+    private class GetAddressTask extends AsyncTask<Void, Void, String> {
+        private final AddressSystem address;
+        private final Location location;
 
-        public GetAddressTask(MyTwentyActivity activity) {
-            my20 = activity;
+        public GetAddressTask(AddressSystem as, Location loc) {
+            address = as;
+            location = loc;
         }
 
         @Override
-        protected String doInBackground(Double... latlon) {
-            double lat = latlon[0];
-            double lon = latlon[1];
+        protected String doInBackground(Void... v) {
+            double lat = location.getLatitude();
+            double lon = location.getLongitude();
             List<Address> addresses;
             StringBuilder buff = new StringBuilder();
             try {
@@ -72,8 +75,7 @@ class ReverseGeocoder {
 
         @Override
         protected void onPostExecute(String newAddress) {
-            // update address back on UI thread
-            my20.setAddress(newAddress);
+            address.onAddressLookupComplete(newAddress, location);
         }
     }
 
@@ -102,13 +104,13 @@ class ReverseGeocoder {
             geo = null;
     }
 
-    void setAddress(MyTwentyActivity my20, double lat, double lon) {
+    void startLookup(AddressSystem address, Location loc) {
         if(!isAvail) {
             hasAddress = false;
-            my20.setAddress(NOT_AVAILABLE);
+            address.onAddressLookupComplete(NOT_AVAILABLE, loc);
             return;
         }
-        new GetAddressTask(my20).execute(new Double[] { lat, lon });
+        new GetAddressTask(address, loc).execute(new Void[] { });
     }
 
     boolean hasAddress() {
