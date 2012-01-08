@@ -30,9 +30,7 @@ public class AddressSystem {
     private String timeTemplate;
     private long latestTime;
     private Time timeFormatter;
-
     private String sourceTemplate;
-    private int meters;
 
     public AddressSystem(Activity a) {
         activity = a;
@@ -68,13 +66,13 @@ public class AddressSystem {
         handler = new Handler();
         hasAddress = false;
         sourceTemplate = activity.getString(R.string.address_label_accuracy);
-        meters = 0;
         timeTemplate = activity.getString(R.string.address_label_age);
         latestTime = System.currentTimeMillis();
         timeFormatter = new Time(Calendar.getInstance().getTimeZone().getID());
     }
 
     void updateAddress(Location loc) {
+        DebugFile.log(TAG, "looking up " + loc.getProvider() + " location");
         reverseGeocoder.startLookup(this, loc);
     }
 
@@ -101,31 +99,45 @@ public class AddressSystem {
         txtAge.setVisibility(TextView.INVISIBLE);
         latestTime = loc.getTime();
 
-        // update the timer in two minutes
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                // if last update was newer than expected, don't age the result
-                if(latestTime > loc.getTime()) {
-                    return;
+        // if location data is old, display age, otherwise wait for age
+        long timeOffset = System.currentTimeMillis() - loc.getTime();
+        if(timeOffset >= TWO_MINUTES) {
+            displayAge(loc);
+        } else {
+            // update via timer
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // if last update was newer than expected, don't age the result
+                    if(latestTime > loc.getTime()) {
+                        return;
+                    }
+                    displayAge(loc);
                 }
-
-                txtLabel.setText(R.string.address_label_old);
-
-                timeFormatter.set(loc.getTime());
-                int hour = (timeFormatter.hour > 12 ? timeFormatter.hour - 12 : timeFormatter.hour);
-                int min = timeFormatter.minute;
-                String ampm = (timeFormatter.hour <= 12 ? "AM" : "PM");
-                String timeStr = String.format(timeTemplate, hour, min, ampm);
-                DebugFile.log(TAG, "at time=" + timeStr);
-                txtAge.setText(timeStr);
-                txtAge.setVisibility(TextView.VISIBLE);
-            }
-        }, TWO_MINUTES);
+            }, TWO_MINUTES - timeOffset);
+        }
     }
 
     boolean hasAddress() {
         return hasAddress;
+    }
+
+    private void displayAge(Location loc) {
+        // get location time, convert 24-hour to 12-hour
+        timeFormatter.set(loc.getTime());
+        int hour = timeFormatter.hour;
+        int min = timeFormatter.minute;
+        String ampm = (timeFormatter.hour <= 12 ? "AM" : "PM");
+        hour = (hour > 12 ? hour - 12 : hour);
+        if(hour == 0)
+            hour = 12;
+
+        // build string and update UI
+        String timeStr = String.format(timeTemplate, hour, min, ampm);
+        DebugFile.log(TAG, "displaying location age " + timeStr);
+        txtLabel.setText(R.string.address_label_old);
+        txtAge.setText(timeStr);
+        txtAge.setVisibility(TextView.VISIBLE);
     }
 
     @Override

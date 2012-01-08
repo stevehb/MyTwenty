@@ -19,6 +19,7 @@ class ReverseGeocoder {
     private final String NOT_AVAILABLE;
     private final String NO_ADDRESS;
     private final String IO_EXCEPTION;
+    private final String PARSE_ERROR;
 
     private class GetAddressTask extends AsyncTask<Void, Void, String> {
         private final AddressSystem address;
@@ -62,14 +63,15 @@ class ReverseGeocoder {
                 hasAddress = true;
                 return buff.toString();
             } catch (IOException e) {
-                DebugFile.log(TAG, IO_EXCEPTION + " " + e.getLocalizedMessage());
+                String msg = IO_EXCEPTION + " " + e.getLocalizedMessage();
+                DebugFile.log(TAG, msg);
                 if(e.getLocalizedMessage().equalsIgnoreCase("service not available")) {
                     DebugFile.log(TAG, "disabling service");
                     isAvail = false;
                     return NOT_AVAILABLE;
                 }
                 hasAddress = false;
-                return IO_EXCEPTION + e.getLocalizedMessage();
+                return PARSE_ERROR;
             }
         }
 
@@ -83,6 +85,7 @@ class ReverseGeocoder {
         NOT_AVAILABLE = c.getString(R.string.geo_not_available);
         NO_ADDRESS = c.getString(R.string.geo_no_address);
         IO_EXCEPTION = c.getString(R.string.geo_io_exception);
+        PARSE_ERROR = c.getString(R.string.geo_parse_error);
         hasAddress = false;
 
         /* TODO

@@ -40,6 +40,7 @@ class TwentyListener implements LocationListener {
         if(loc != null) {
             DebugFile.log(TAG, "onLocationChanged(): " + loc.getProvider() + " location: (" + loc.getLatitude() + ", " +
                     loc.getLongitude() + ") accuracy=" + loc.getAccuracy() + " time=" + loc.getTime());
+            DebugFile.log(TAG, "offsetFrom current time: " + ((System.currentTimeMillis() - loc.getTime()) / 1000) + " seconds");
         }
 
         // first test the incoming location
@@ -168,6 +169,7 @@ class TwentyListener implements LocationListener {
         onLocationChanged(locManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER));
         onLocationChanged(locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
         onLocationChanged(locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        activity.setAddress(bestLocation);
     }
 
     void hideNotification() {

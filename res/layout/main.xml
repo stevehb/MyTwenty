@@ -111,8 +111,7 @@
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="4dp"
                 android:text="@string/na"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:visibility="invisible" />
+                android:textAppearance="?android:attr/textAppearanceLarge" />
         </LinearLayout>
 
         <EditText
