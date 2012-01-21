@@ -3,6 +3,7 @@ package net.cruciblesoftware.MyTwenty;
 import java.util.Calendar;
 
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.os.Handler;
 import android.text.ClipboardManager;
@@ -13,7 +14,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class AddressSystem {
+class AddressSystem {
     private static final String TAG = "20: " + AddressSystem.class.getSimpleName();
     private static final int TWO_MINUTES = 1000 * 60 * 2;
 
@@ -50,7 +51,7 @@ public class AddressSystem {
             public boolean onLongClick(View v) {
                 if(txtAddress.toString().isEmpty())
                     return true;
-                ClipboardManager clipboard = (ClipboardManager)(activity.getSystemService(activity.CLIPBOARD_SERVICE));
+                ClipboardManager clipboard = (ClipboardManager)(activity.getSystemService(Context.CLIPBOARD_SERVICE));
                 clipboard.setText(txtAddress.getText().toString());
                 Toast toast = Toast.makeText(activity, R.string.toast_address_copied, Toast.LENGTH_SHORT);
                 toast.show();
@@ -72,7 +73,7 @@ public class AddressSystem {
     }
 
     void updateAddress(Location loc) {
-        DebugFile.log(TAG, "looking up " + loc.getProvider() + " location");
+        DebugLog.log(TAG, "looking up " + loc.getProvider() + " location");
         reverseGeocoder.startLookup(this, loc);
     }
 
@@ -90,7 +91,7 @@ public class AddressSystem {
 
         // set accuracy
         String sourceStr = String.format(sourceTemplate, loc.getProvider(), (int)loc.getAccuracy());
-        DebugFile.log(TAG, "formatted sourceTemplate=" + sourceStr);
+        DebugLog.log(TAG, "formatted sourceTemplate=" + sourceStr);
         txtAccuracy.setText(sourceStr);
         txtAccuracy.setVisibility(TextView.VISIBLE);
 
@@ -134,7 +135,7 @@ public class AddressSystem {
 
         // build string and update UI
         String timeStr = String.format(timeTemplate, hour, min, ampm);
-        DebugFile.log(TAG, "displaying location age " + timeStr);
+        DebugLog.log(TAG, "displaying location age " + timeStr);
         txtLabel.setText(R.string.address_label_old);
         txtAge.setText(timeStr);
         txtAge.setVisibility(TextView.VISIBLE);

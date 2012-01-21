@@ -138,47 +138,45 @@
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/linearLayout7"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/vertical_spacer"
-        android:gravity="center" >
+        android:layout_marginTop="@dimen/vertical_spacer" >
 
-        <!-- The map view -->
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="@dimen/vertical_spacer" 
+            android:gravity="center" >
+
+            <!-- The two buttons -->
+
+            <ToggleButton
+                android:id="@+id/btnContinuous"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textOff="@string/btn_continuous_label"
+                android:textOn="@string/btn_continuous_label" />
+
+            <Button
+                android:id="@+id/btnRefresh"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/btn_refresh_label" />
+        </LinearLayout>
 
         <com.google.android.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
-            android:layout_height="160dp"
+            android:layout_height="match_parent"
+            android:layout_above="@+id/buttonLayout"
             android:layout_marginLeft="@dimen/outer_side_margin"
             android:layout_marginRight="@dimen/outer_side_margin"
-            android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/linearLayout8"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/outer_side_margin"
-        android:layout_marginRight="@dimen/outer_side_margin"
-        android:layout_marginTop="@dimen/vertical_spacer"
-        android:gravity="center" >
-
-        <!-- The two buttons -->
-
-        <ToggleButton
-            android:id="@+id/btnContinuous"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textOff="@string/btn_continuous_label"
-            android:textOn="@string/btn_continuous_label" />
-
-        <Button
-            android:id="@+id/btnRefresh"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:text="@string/btn_refresh_label" />
-    </LinearLayout>
+            android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw"
+            android:gravity="center" >
+        </com.google.android.maps.MapView>
+    </RelativeLayout>
 
 </LinearLayout>

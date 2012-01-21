@@ -55,7 +55,7 @@ class ReverseGeocoder {
 
                 // prepend the feature if it's not already in address
                 String feature = a.getFeatureName();
-                DebugFile.log(TAG, "detected feature name: " + feature);
+                DebugLog.log(TAG, "detected feature name: " + feature);
                 if(!buff.toString().toLowerCase().contains(feature.toLowerCase())) {
                     buff = new StringBuilder(feature + "\n" + buff.toString());
                 }
@@ -64,9 +64,9 @@ class ReverseGeocoder {
                 return buff.toString();
             } catch (IOException e) {
                 String msg = IO_EXCEPTION + " " + e.getLocalizedMessage();
-                DebugFile.log(TAG, msg);
+                DebugLog.log(TAG, msg);
                 if(e.getLocalizedMessage().equalsIgnoreCase("service not available")) {
-                    DebugFile.log(TAG, "disabling service");
+                    DebugLog.log(TAG, "disabling service");
                     isAvail = false;
                     return NOT_AVAILABLE;
                 }

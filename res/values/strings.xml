@@ -15,7 +15,8 @@
     <string name="geo_no_address">The geocoder found no address!</string>
     <string name="geo_parse_error">Unable to parse server response. Please try again.</string>
     <string name="geo_io_exception">ERROR: I/O Exception encountered while reverse geocoding: </string>
-    <string name="map_launch_dialog_message">Launch map program?</string>
+    <string name="map_launch_dialog_message">Quit MyTwenty to launch map program?</string>
+    <string name="map_launch_dialog_title">Launch map program?</string>
     <string name="map_launch_dialog_positive">Yes!</string>
     <string name="map_launch_dialog_negative">No way!</string>
     <string name="progress_dialog_title">Working...</string>
