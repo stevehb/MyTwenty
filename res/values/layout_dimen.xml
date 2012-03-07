@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="vertical_spacer">10dp</dimen>
+    <dimen name="vertical_spacer">8dp</dimen>
     <dimen name="outer_side_margin">12dp</dimen>
     <dimen name="address_inner_padding">14dp</dimen>
 

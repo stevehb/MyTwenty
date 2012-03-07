@@ -109,6 +109,7 @@ class AddressSystem {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    DebugLog.log(TAG, "running two minute update");
                     // if last update was newer than expected, don't age the result
                     if(latestTime > loc.getTime()) {
                         return;
@@ -116,6 +117,7 @@ class AddressSystem {
                     displayAge(loc);
                 }
             }, TWO_MINUTES - timeOffset);
+            DebugLog.log(TAG, "submitted two minute warning");
         }
     }
 

@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:contentDescription="@string/icon_content_desc"
-            android:src="@drawable/icon_big" />
+            android:src="@drawable/ic_launcher" />
 
         <LinearLayout
             android:id="@+id/linearLayout2"
@@ -138,6 +138,8 @@
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </LinearLayout>
 
+    <!-- Use RelativeLayout to positions buttons below expanding MapView -->
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -148,7 +150,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="@dimen/vertical_spacer" 
+            android:layout_marginTop="@dimen/vertical_spacer"
+            android:layout_marginBottom="@dimen/vertical_spacer"
             android:gravity="center" >
 
             <!-- The two buttons -->

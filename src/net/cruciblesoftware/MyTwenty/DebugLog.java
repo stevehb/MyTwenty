@@ -12,11 +12,14 @@ public class DebugLog {
     private static final String TAG = "20: " + DebugLog.class.getSimpleName();
     private static BufferedWriter writer;
     static boolean writeToFile = false;
+    static boolean muzzle = false;
 
     static {
         try {
-            Log.v(TAG, "creating my20 log");
-            if(writeToFile) {
+            if(!muzzle) {
+                Log.v(TAG, "creating MyTwenty log");
+            }
+            if(!muzzle && writeToFile) {
                 writer = new BufferedWriter(new FileWriter(Environment.getExternalStorageDirectory() + "/my20_log.txt", true));
                 writer.write("Starting My20 log at " + (new Date()).toString() + "\n");
                 writer.flush();
@@ -29,8 +32,10 @@ public class DebugLog {
 
     static void log(String tag, String msg) {
         try {
-            Log.d(tag, msg);
-            if(writeToFile) {
+            if(!muzzle) {
+                Log.d(tag, msg);
+            }
+            if(!muzzle && writeToFile) {
                 writer.write(tag + ": " + msg + "\n");
                 writer.flush();
             }

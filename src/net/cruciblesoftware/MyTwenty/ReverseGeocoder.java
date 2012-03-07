@@ -13,7 +13,7 @@ import android.os.AsyncTask;
 class ReverseGeocoder {
     private static final String TAG = "20: " + ReverseGeocoder.class.getSimpleName();
 
-    private boolean isAvail;
+    private boolean isServiceAvail;
     private boolean hasAddress;
     private final Geocoder geo;
     private final String NOT_AVAILABLE;
@@ -39,7 +39,7 @@ class ReverseGeocoder {
             try {
                 // get addresses
                 addresses = geo.getFromLocation(lat, lon, 1);
-                if(addresses.isEmpty()) {
+                if(addresses == null || addresses.isEmpty()) {
                     hasAddress = false;
                     return NO_ADDRESS;
                 }
@@ -67,7 +67,7 @@ class ReverseGeocoder {
                 DebugLog.log(TAG, msg);
                 if(e.getLocalizedMessage().equalsIgnoreCase("service not available")) {
                     DebugLog.log(TAG, "disabling service");
-                    isAvail = false;
+                    isServiceAvail = false;
                     return NOT_AVAILABLE;
                 }
                 hasAddress = false;
@@ -100,15 +100,15 @@ class ReverseGeocoder {
          * and a check for the IOException.
          */
 
-        isAvail = Geocoder.isPresent();
-        if(isAvail)
+        isServiceAvail = Geocoder.isPresent();
+        if(isServiceAvail)
             geo = new Geocoder(c, Locale.getDefault());
         else
             geo = null;
     }
 
     void startLookup(AddressSystem address, Location loc) {
-        if(!isAvail) {
+        if(!isServiceAvail) {
             hasAddress = false;
             address.onAddressLookupComplete(NOT_AVAILABLE, loc);
             return;
