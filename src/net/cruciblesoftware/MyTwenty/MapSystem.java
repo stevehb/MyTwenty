@@ -24,46 +24,6 @@ class MapSystem {
     private Location location;
     private int zoomLevel = 18;
 
-
-    //    private class PositionOverlay extends ItemizedOverlay<OverlayItem> {
-    //        private final OverlayItem marker;
-    //        private OverlayItem longTouchItem;
-    //
-    //        PositionOverlay(Drawable defaultMarker) {
-    //            super(boundCenterBottom(defaultMarker));
-    //            marker = createItem(0);
-    //            marker.setMarker(boundCenterBottom(defaultMarker));
-    //            populate();
-    //        }
-    //
-    //        @Override
-    //        protected OverlayItem createItem(int i) {
-    //            switch(i) {
-    //            case 0:
-    //                return marker;
-    //            case 1:
-    //                return longTouchItem;
-    //            default:
-    //                return null;
-    //            }
-    //        }
-    //
-    //        @Override
-    //        public int size() {
-    //            return 1;
-    //        }
-    //
-    //        @Override
-    //        protected boolean onTap(int index) {
-    //            OverlayItem item = createItem(index);
-    //            AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
-    //            dialog.setTitle(item.getTitle());
-    //            dialog.setMessage(item.getSnippet());
-    //            dialog.show();
-    //            return true;
-    //        }
-    //    }
-
     MapSystem(Activity a, final AddressSystem address) {
         activity = a;
 

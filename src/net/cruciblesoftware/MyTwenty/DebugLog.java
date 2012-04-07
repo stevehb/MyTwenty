@@ -12,7 +12,7 @@ public class DebugLog {
     private static final String TAG = "20: " + DebugLog.class.getSimpleName();
     private static BufferedWriter writer;
     static boolean writeToFile = false;
-    static boolean muzzle = false;
+    static boolean muzzle = true;
 
     static {
         try {

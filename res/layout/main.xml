@@ -150,8 +150,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginTop="@dimen/vertical_spacer"
             android:layout_marginBottom="@dimen/vertical_spacer"
+            android:layout_marginTop="@dimen/vertical_spacer"
             android:gravity="center" >
 
             <!-- The two buttons -->
@@ -170,16 +170,24 @@
                 android:text="@string/btn_refresh_label" />
         </LinearLayout>
 
+        <!--
+        The MapView included below is in a separate file because it contains
+        the Google Maps API Key. The inlcuded XML file should be of the form
+
+        <?xml version="1.0" encoding="utf-8"?>
         <com.google.android.maps.MapView
+            xmlns:android="http://schemas.android.com/apk/res/android"
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@+id/buttonLayout"
             android:layout_marginLeft="@dimen/outer_side_margin"
             android:layout_marginRight="@dimen/outer_side_margin"
-            android:apiKey="053VFCiyb0FbC_HkkRv-CALVQQa-S13fIvBRFkw"
+            android:apiKey="YOUR_KEY_HERE"
             android:gravity="center" >
         </com.google.android.maps.MapView>
+        -->
+        <include layout="@layout/mapview_debug"/>
     </RelativeLayout>
 
 </LinearLayout>
