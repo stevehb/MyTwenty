@@ -187,7 +187,7 @@
             android:gravity="center" >
         </com.google.android.maps.MapView>
         -->
-        <include layout="@layout/mapview_debug"/>
+        <include layout="@layout/mapview_release"/>
     </RelativeLayout>
 
 </LinearLayout>

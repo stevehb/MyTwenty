@@ -77,12 +77,21 @@ class AddressSystem {
         reverseGeocoder.startLookup(this, loc);
     }
 
-    void onAddressLookupComplete(String address, final Location loc) {
-        txtAddress.setText(address);
+    void onAddressLookupComplete(final String address, final Location loc) {
+        // convert one line address to multi-line
+        StringBuilder multilineAddr = new StringBuilder();
+        String[] lines = address.split(activity.getString(R.string.address_delimiter));
+        int nLines = 0;
+        for(String l : lines) {
+            multilineAddr.append(l.trim() + "\n");
+            nLines++;
+        }
+        txtAddress.setLines(nLines);
+        txtAddress.setText(multilineAddr.toString());
         hasAddress = reverseGeocoder.hasAddress();
 
         // if not a real address, just clean up and get out
-        if(!reverseGeocoder.hasAddress()) {
+        if(!hasAddress) {
             txtLabel.setText(R.string.address_label_new);
             txtAge.setVisibility(TextView.INVISIBLE);
             txtAccuracy.setVisibility(TextView.INVISIBLE);
@@ -117,7 +126,6 @@ class AddressSystem {
                     displayAge(loc);
                 }
             }, TWO_MINUTES - timeOffset);
-            DebugLog.log(TAG, "submitted two minute warning");
         }
     }
 

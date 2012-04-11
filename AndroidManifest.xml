@@ -13,6 +13,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
      -->
 
+    <!--  android:debuggable="false" -->
     <application
         android:debuggable="false"
         android:icon="@drawable/ic_launcher"
