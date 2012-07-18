@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script src="javascripts/respond.js"></script>
+    <script>
+      $(document).ready(function() {
+        $("#play_link").center();
+      });
+    </script>
     <!--[if lt IE 9]>
       <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -38,10 +43,14 @@
           <span class="credits left">Project maintained by <a href="https://github.com/stevehb">stevehb</a></span>
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
-
         <h3>Welcome to MyTwenty</h3>
-
-<p>MyTwenty is an open source Android app that gives you your current address based latitude/longitude coordinates from the GPS or network triangulation.</p>
+        <p>MyTwenty is an open source Android app that gives you your current address based latitude/longitude coordinates from the GPS or network triangulation.</p>
+        <p id="play_link">
+          <a href="http://play.google.com/store/apps/details?id=net.cruciblesoftware.MyTwenty">
+            <img alt="Get it on Google Play"
+                 src="http://www.android.com/images/brand/get_it_on_play_logo_large.png" />
+          </a>
+        </p>
       </section>
 
     </div>
